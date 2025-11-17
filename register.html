@@ -96,7 +96,14 @@
             document.getElementById('loading-view').classList.remove('hidden');
             document.querySelector('#loading-view p').textContent = 'กำลังลงทะเบียน...';
 
-            const data = { userId: liffProfile.userId, 'ชื่อ - นามสกุล': document.getElementById('fullName').value, 'ทะเบียนรถ': document.getElementById('licensePlate').value, 'เบอร์ติดต่อ': document.getElementById('contactNumber').value, 'สาขา': document.getElementById('branch').value };
+          
+const data = { 
+    userId: liffProfile.userId, 
+    'ชื่อ - นามสกุล': document.getElementById('fullName').value,
+    'ทะเบียนรถ': document.getElementById('licensePlate').value,
+    'เบอร์ติดต่อ': document.getElementById('contactNumber').value,
+    'สาขา': document.getElementById('branch').value
+};
 
             try {
                 const result = await serverCall('registerEmployee', data);
