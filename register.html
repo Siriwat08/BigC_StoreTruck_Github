@@ -31,147 +31,155 @@
         <div class="spinner"></div>
         <p>กำลังเตรียมหน้าลงทะเบียน...</p>
     </div>
-
-    <div id="register-form-container" class="card hidden">
-        <h2 class="view-title">ลงทะเบียนพนักงานใหม่</h2>
-        <p style="text-align: center; margin-top: -1rem; margin-bottom: 1.5rem; color: #777;">กรุณากรอกข้อมูลของคุณเพื่อเริ่มใช้งานระบบ</p>
-        <form id="register-form">
-            <div class="form-group"><label for="fullName">ชื่อ - นามสกุล</label><input type="text" id="fullName" required placeholder="เช่น สมชาย ใจดี"></div>
-            <div class="form-group"><label for="licensePlate">ทะเบียนรถ</label><input type="text" id="licensePlate" required placeholder="เช่น 1กก-9999 กทม"></div>
-            <div class="form-group"><label for="contactNumber">เบอร์ติดต่อ</label><input type="tel" id="contactNumber" required placeholder="เช่น 0909999999"></div>
-            <div class="form-group"><label for="branch">สาขา</label><select id="branch" required><option value="" disabled selected>-- กรุณาเลือกสาขา --</option></select></div>
-            <button type="submit" class="btn-submit">ลงทะเบียน</button>
-        </form>
+code
+Code
+download
+content_copy
+expand_less
+<div id="register-form-container" class="card hidden">
+    <h2 class="view-title">ลงทะเบียนพนักงานใหม่</h2>
+    <p style="text-align: center; margin-top: -1rem; margin-bottom: 1.5rem; color: #777;">กรุณากรอกข้อมูลของคุณเพื่อเริ่มใช้งานระบบ</p>
+    <form id="register-form">
+        <div class="form-group"><label for="fullName">ชื่อ - นามสกุล</label><input type="text" id="fullName" required placeholder="เช่น สมชาย ใจดี"></div>
+        <div class="form-group"><label for="licensePlate">ทะเบียนรถ</label><input type="text" id="licensePlate" required placeholder="เช่น 1กก-9999 กทม"></div>
+        <div class="form-group"><label for="contactNumber">เบอร์ติดต่อ</label><input type="tel" id="contactNumber" required placeholder="เช่น 0909999999"></div>
+        <div class="form-group"><label for="branch">สาขา</label><select id="branch" required><option value="" disabled selected>-- กรุณาเลือกสาขา --</option></select></div>
+        <button type="submit" class="btn-submit">ลงทะเบียน</button>
+    </form>
+</div>
+<div id="custom-alert-overlay" class="hidden">
+    <div id="custom-alert-box">
+        <h3 id="custom-alert-title"></h3>
+        <p id="custom-alert-message"></p>
+        <button id="custom-alert-close-btn"></button>
     </div>
+</div>
+<script>
+    const LIFF_ID = '2008492672-NdaLDanK'; 
+    const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzwDN253O2M4VNRLnlUktsZKvt5LWfJ1qh1mYE2uTjP5MN5XWM_h4gW7gqqg9fQaTWZ/exec';
 
-    <div id="custom-alert-overlay" class="hidden">
-        <div id="custom-alert-box">
-            <h3 id="custom-alert-title"></h3>
-            <p id="custom-alert-message"></p>
-            <button id="custom-alert-close-btn"></button>
-        </div>
-    </div>
+    let liffProfile = null;
 
-    <script>
-        const LIFF_ID = '2008492672-NdaLDanK'; 
-        const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzwDN253O2M4VNRLnlUktsZKvt5LWfJ1qh1mYE2uTjP5MN5XWM_h4gW7gqqg9fQaTWZ/exec';
-
-        let liffProfile = null;
-
-        async function main() {
-            try {
-                await liff.init({ liffId: LIFF_ID });
-                if (!liff.isLoggedIn()) { liff.login(); return; }
-                liffProfile = await liff.getProfile();
-                
-                const branches = await serverCall('getBranchList');
-                populateBranchDropdown(branches);
-                
-                document.getElementById('loading-view').classList.add('hidden');
-                document.getElementById('register-form-container').classList.remove('hidden');
-            } catch (error) {
-                showCustomAlert('เกิดข้อผิดพลาด', error.message, false);
-                document.getElementById('loading-view').classList.add('hidden');
-            }
+    async function main() {
+        try {
+            await liff.init({ liffId: LIFF_ID });
+            if (!liff.isLoggedIn()) { liff.login(); return; }
+            liffProfile = await liff.getProfile();
+            
+            const branches = await serverCall('getBranchList');
+            populateBranchDropdown(branches);
+            
+            document.getElementById('loading-view').classList.add('hidden');
+            document.getElementById('register-form-container').classList.remove('hidden');
+        } catch (error) {
+            showCustomAlert('เกิดข้อผิดพลาด', error.message, false);
+            document.getElementById('loading-view').classList.add('hidden');
         }
-
-        main();
-
-        function populateBranchDropdown(branches) {
-    const selectElement = document.getElementById('branch');
-    if (branches && branches.length > 0) {
-        branches.forEach(branchObj => {
-            const option = document.createElement('option');
-            // ค่าของ option คือชื่อสาขา
-            option.value = branchObj.BranchName;
-            // ข้อความที่แสดงก็คือชื่อสาขา
-            option.textContent = branchObj.BranchName;
-            selectElement.appendChild(option);
-        });
     }
-}
-        document.getElementById('register-form').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            document.getElementById('register-form-container').classList.add('hidden');
-            document.getElementById('loading-view').classList.remove('hidden');
-            document.querySelector('#loading-view p').textContent = 'กำลังลงทะเบียน...';
 
-            const data = { 
-    userId: liffProfile.userId, 
-    'ชื่อ - นามสกุล': document.getElementById('fullName').value,
-    'ทะเบียนรถ': document.getElementById('licensePlate').value,
-    'เบอร์ติดต่อ': document.getElementById('contactNumber').value,
-    'สาขา': document.getElementById('branch').value
+    main();
+
+    function populateBranchDropdown(branches) {
+const selectElement = document.getElementById('branch');
+if (branches && branches.length > 0) {
+    branches.forEach(branchObj => {
+        const option = document.createElement('option');
+        // ค่าของ option คือชื่อสาขา
+        option.value = branchObj.BranchName;
+        // ข้อความที่แสดงก็คือชื่อสาขา
+        option.textContent = branchObj.BranchName;
+        selectElement.appendChild(option);
+    });
+}
+
+}
+document.getElementById('register-form').addEventListener('submit', async function(e) {
+e.preventDefault();
+document.getElementById('register-form-container').classList.add('hidden');
+document.getElementById('loading-view').classList.remove('hidden');
+document.querySelector('#loading-view p').textContent = 'กำลังลงทะเบียน...';
+
+const data = {
+userId: liffProfile.userId,
+'ชื่อ - นามสกุล': document.getElementById('fullName').value,
+'ทะเบียนรถ': document.getElementById('licensePlate').value,
+'เบอร์ติดต่อ': document.getElementById('contactNumber').value,
+'สาขา': document.getElementById('branch').value
 };
 
-            try {
-                const result = await serverCall('registerEmployee', data);
-                document.getElementById('loading-view').classList.add('hidden');
-                showCustomAlert(`คุณ ${liffProfile.displayName}`, result.message, true);
-            } catch (error) {
-                document.getElementById('loading-view').classList.add('hidden');
-                document.getElementById('register-form-container').classList.remove('hidden');
-                showCustomAlert('เกิดข้อผิดพลาด', error.message, false);
-            }
-        });
-        
-        function serverCall(action, ...args) {
-            const url = GAS_WEB_APP_URL;
-            const payload = { action: action, args: args };
-            return fetch(url, {
-                method: 'POST',
-                body: JSON.stringify(payload),
-                // ★★★★★★★★★★★★★★★★★★ จุดแก้ไข ★★★★★★★★★★★★★★★★★★
-                headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // ใช้ slash (/)
-                mode: 'cors'
-            })
-            .then(response => response.json())
-            .then(data => { if (data.status === 'error') { throw new Error(data.message); } return data.response; });
+code
+Code
+download
+content_copy
+expand_less
+try {
+            const result = await serverCall('registerEmployee', data);
+            document.getElementById('loading-view').classList.add('hidden');
+            showCustomAlert(`คุณ ${liffProfile.displayName}`, result.message, true);
+        } catch (error) {
+            document.getElementById('loading-view').classList.add('hidden');
+            document.getElementById('register-form-container').classList.remove('hidden');
+            showCustomAlert('เกิดข้อผิดพลาด', error.message, false);
         }
+    });
+    
+    function serverCall(action, ...args) {
+        const url = GAS_WEB_APP_URL;
+        const payload = { action: action, args: args };
+        return fetch(url, {
+            method: 'POST',
+            body: JSON.stringify(payload),
+            // ★★★★★★★★★★★★★★★★★★ จุดแก้ไข ★★★★★★★★★★★★★★★★★★
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // ใช้ slash (/)
+            mode: 'cors'
+        })
+        .then(response => response.json())
+        .then(data => { if (data.status === 'error') { throw new Error(data.message); } return data.response; });
+    }
 
-        let countdownInterval;
-        function showCustomAlert(title, message, isSuccess = false) {
-            const overlay = document.getElementById('custom-alert-overlay');
-            const titleEl = document.getElementById('custom-alert-title');
-            const messageEl = document.getElementById('custom-alert-message');
-            const closeBtn = document.getElementById('custom-alert-close-btn');
+    let countdownInterval;
+    function showCustomAlert(title, message, isSuccess = false) {
+        const overlay = document.getElementById('custom-alert-overlay');
+        const titleEl = document.getElementById('custom-alert-title');
+        const messageEl = document.getElementById('custom-alert-message');
+        const closeBtn = document.getElementById('custom-alert-close-btn');
 
-            titleEl.textContent = title;
-            messageEl.textContent = message;
-            overlay.classList.remove('hidden');
-            clearInterval(countdownInterval);
+        titleEl.textContent = title;
+        messageEl.textContent = message;
+        overlay.classList.remove('hidden');
+        clearInterval(countdownInterval);
 
-            if (isSuccess) {
-                let countdown = 5;
-                closeBtn.textContent = `ตกลง (ไปหน้าหลักใน ${countdown} วิ)`;
-                countdownInterval = setInterval(() => {
-                    countdown--;
-                    if (countdown > 0) {
-                        closeBtn.textContent = `ตกลง (ไปหน้าหลักใน ${countdown} วิ)`;
-                    } else {
-                        clearInterval(countdownInterval);
-                        closeAndExit();
-                    }
-                }, 1000);
-            } else {
-                closeBtn.textContent = 'ตกลง';
-            }
-
-            closeBtn.onclick = () => {
-                clearInterval(countdownInterval);
-                if (isSuccess) {
-                    closeAndExit();
+        if (isSuccess) {
+            let countdown = 5;
+            closeBtn.textContent = `ตกลง (ไปหน้าหลักใน ${countdown} วิ)`;
+            countdownInterval = setInterval(() => {
+                countdown--;
+                if (countdown > 0) {
+                    closeBtn.textContent = `ตกลง (ไปหน้าหลักใน ${countdown} วิ)`;
                 } else {
-                    overlay.classList.add('hidden');
+                    clearInterval(countdownInterval);
+                    closeAndExit();
                 }
-            };
+            }, 1000);
+        } else {
+            closeBtn.textContent = 'ตกลง';
         }
 
-        function closeAndExit() {
-            document.getElementById('custom-alert-overlay').classList.add('hidden');
-            window.location.href = './index.html';
-        }
+        closeBtn.onclick = () => {
+            clearInterval(countdownInterval);
+            if (isSuccess) {
+                closeAndExit();
+            } else {
+                overlay.classList.add('hidden');
+            }
+        };
+    }
 
-    </script>
+    function closeAndExit() {
+        document.getElementById('custom-alert-overlay').classList.add('hidden');
+        window.location.href = './index.html';
+    }
+
+</script>
 </body>
 </html>
